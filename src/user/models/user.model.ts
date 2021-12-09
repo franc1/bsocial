@@ -2,8 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { Comment } from '../../comment/models/comment.model';
+import { Post } from '../../post/models/post.model';
 
 @Entity('user')
 export class User {
@@ -54,4 +58,16 @@ export class User {
     name: 'password',
   })
   password: string;
+
+  @OneToMany(() => Post, (post) => post.createdBy, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
+  posts: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.createdBy, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
+  comments: Comment[];
 }

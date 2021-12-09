@@ -3,8 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionOptions } from 'typeorm';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { CommentModule } from './comment/comment.module';
+import { PostModule } from './post/post.module';
+import { UserModule } from './user/user.module';
 
 const getOrmConfig = (configService: ConfigService) =>
   ({
@@ -34,8 +36,12 @@ const getOrmConfig = (configService: ConfigService) =>
         autoLoadEntities: true,
       }),
     }),
+    PostModule,
+    CommentModule,
+    UserModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

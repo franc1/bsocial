@@ -14,4 +14,8 @@ export = {
   entities: [__dirname + '/src/**/*.model.{js,ts}'],
   migrations: [__dirname + '/src/migrations/*.{js,ts}'],
   subscribers: [__dirname + '/src/subscribers/**/*.{js,ts}'],
+  cli: {
+    migrationsDir: __dirname + '/src/migrations',
+    subscribersDir: __dirname + '/src/subscribers',
+  },
 } as ConnectionOptions;

@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -70,4 +72,21 @@ export class User {
     onUpdate: 'NO ACTION',
   })
   comments: Comment[];
+
+  @ManyToMany(() => User, (user) => user.followedByUsers)
+  @JoinTable({
+    name: 'user_follower',
+    joinColumn: {
+      name: 'follower_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'followed_id',
+      referencedColumnName: 'id',
+    },
+  })
+  followUsers: User[];
+
+  @ManyToMany(() => User, (user) => user.followUsers)
+  followedByUsers: User[];
 }

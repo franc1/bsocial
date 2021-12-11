@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionOptions } from 'typeorm';
 
@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/passport-strategies/jwt/jwt-auth.guard';
 import { CommentModule } from './comment/comment.module';
 import { PostModule } from './post/post.module';
+import { HttpExceptionFilter } from './shared/http-exception.filter';
 import { UserModule } from './user/user.module';
 
 const getOrmConfig = (configService: ConfigService) =>
@@ -48,6 +49,10 @@ const getOrmConfig = (configService: ConfigService) =>
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
   ],
 })

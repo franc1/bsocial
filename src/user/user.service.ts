@@ -103,4 +103,27 @@ export class UserService {
 
     return await this.postService.getAll({ userId: id }, pagination);
   }
+
+  async followUser(id: number, token: Token): Promise<void> {
+    if (token.id === id) {
+      throw new ApiError(400, ErrorCodes.CANNOT_FOLLOW_YOURSELF);
+    }
+    const tokenUser = await this.userRepository.findOne(token.id);
+
+    const userToFollow = await this.userRepository.findOne(id, {
+      relations: ['followedByUsers'],
+    });
+    if (!userToFollow) {
+      throw new NotFoundException();
+    }
+
+    if (
+      (userToFollow.followedByUsers as User[]).find((u) => u.id === token.id)
+    ) {
+      throw new ApiError(400, ErrorCodes.USER_ALREADY_FOLLOWED);
+    }
+
+    (userToFollow.followedByUsers as User[]).push(tokenUser);
+    await this.userRepository.save(userToFollow);
+  }
 }

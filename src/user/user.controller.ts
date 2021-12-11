@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -73,5 +74,22 @@ export class UserController {
       itemsTotal: postCount,
       pagesTotal: Math.ceil(postCount / pagination.size),
     };
+  }
+
+  @Patch(':id/follow')
+  @ApiUnauthorizedResponse({
+    type: ErrorResponse,
+  })
+  @ApiForbiddenResponse({
+    type: ErrorResponse,
+  })
+  @ApiNotFoundResponse({
+    type: ErrorResponse,
+  })
+  async followUser(
+    @Param('id', ParseIntPipe) id: number,
+    @TokenParam() token: Token,
+  ): Promise<void> {
+    await this.userService.followUser(id, token);
   }
 }

@@ -44,6 +44,7 @@ export class User {
     nullable: false,
     length: 100,
     name: 'username',
+    unique: true,
   })
   username: string;
 
@@ -51,6 +52,7 @@ export class User {
     nullable: false,
     length: 150,
     name: 'email',
+    unique: true,
   })
   email: string;
 

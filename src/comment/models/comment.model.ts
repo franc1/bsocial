@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -12,6 +13,7 @@ import { User } from '../../user/models/user.model';
 
 @Entity('comment')
 export class Comment {
+  @ApiProperty()
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp',
@@ -19,12 +21,14 @@ export class Comment {
   })
   createdDate: Date;
 
+  @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'int',
     name: 'id',
   })
   id: number;
 
+  @ApiProperty()
   @Column('text', {
     nullable: false,
     name: 'content',
@@ -39,6 +43,7 @@ export class Comment {
   @JoinColumn({ name: 'post_id' })
   post: Post | number;
 
+  @ApiProperty({ type: () => User })
   @ManyToOne(() => User, (user) => user.comments, {
     nullable: false,
     onDelete: 'NO ACTION',

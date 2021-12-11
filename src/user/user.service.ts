@@ -9,6 +9,7 @@ import { PostService } from 'src/post/post.service';
 import { ApiError } from 'src/shared/api-error';
 import { ErrorCodes } from 'src/shared/error-codes';
 import { hashPassword } from 'src/shared/hash-password';
+import { PaginationParams } from 'src/shared/pagination.dto';
 
 import { UserRegisterDTO } from './models/dto/user-register.dto';
 import { User } from './models/user.model';
@@ -79,7 +80,11 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async getAllUserPosts(id: number, token: Token): Promise<Post[]> {
+  async getAllUserPosts(
+    id: number,
+    pagination: PaginationParams,
+    token: Token,
+  ): Promise<{ posts: Post[]; postCount: number }> {
     // Check if user is accesible
     if (id !== token.id) {
       const user = await this.userRepository.findOne(id, {
@@ -96,6 +101,6 @@ export class UserService {
       }
     }
 
-    return await this.postService.getAll({ userId: id });
+    return await this.postService.getAll({ userId: id }, pagination);
   }
 }

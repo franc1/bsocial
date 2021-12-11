@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Token } from 'src/auth/passport-strategies/token.request';
+import { PaginationParams } from 'src/shared/pagination.dto';
 
 import { PostCreateDTO } from './models/dto/post-create.dto';
 import { Post } from './models/post.model';
@@ -17,13 +18,19 @@ export class PostService {
     return await this.postRepository.save(post);
   }
 
-  async getAll(filters: { userId: number }): Promise<Post[]> {
+  async getAll(
+    filters: { userId: number },
+    pagination: PaginationParams,
+  ): Promise<{ posts: Post[]; postCount: number }> {
     const { userId } = filters;
+    const { size, page } = pagination;
 
-    const posts = await this.postRepository.find({
+    const [posts, postCount] = await this.postRepository.findAndCount({
       where: { createdBy: userId },
+      skip: page > 0 ? (page - 1) * size : 0,
+      take: size,
     });
 
-    return posts;
+    return { posts, postCount };
   }
 }

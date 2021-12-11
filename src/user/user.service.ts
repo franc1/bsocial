@@ -21,7 +21,7 @@ export class UserService {
       return null;
     }
 
-    let where: any;
+    let where: any = {};
     if (id) {
       where.id = id;
     } else if (usernameOrEmail) {

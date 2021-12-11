@@ -1,7 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Token } from 'src/auth/passport-strategies/token.request';
+import { Post } from 'src/post/models/post.model';
+import { PostService } from 'src/post/post.service';
 import { ApiError } from 'src/shared/api-error';
 import { ErrorCodes } from 'src/shared/error-codes';
 import { hashPassword } from 'src/shared/hash-password';
+import { PaginationParams } from 'src/shared/pagination.dto';
 
 import { UserRegisterDTO } from './models/dto/user-register.dto';
 import { User } from './models/user.model';
@@ -9,7 +17,10 @@ import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly postService: PostService,
+  ) {}
 
   async findOne(
     by: { usernameOrEmail?: string; id?: number },
@@ -67,5 +78,29 @@ export class UserService {
     user.password = await hashPassword(userDTO.password);
 
     return await this.userRepository.save(user);
+  }
+
+  async getAllUserPosts(
+    id: number,
+    pagination: PaginationParams,
+    token: Token,
+  ): Promise<{ posts: Post[]; postCount: number }> {
+    // Check if user is accesible
+    if (id !== token.id) {
+      const user = await this.userRepository.findOne(id, {
+        loadRelationIds: { relations: ['followedByUsers'] },
+      });
+      if (!user) {
+        throw new NotFoundException();
+      }
+
+      if (!(user.followedByUsers as number[]).find((uId) => uId === token.id)) {
+        throw new ForbiddenException(
+          ErrorCodes.CANNOT_ACCESS_POSTS_OF_THIS_USER,
+        );
+      }
+    }
+
+    return await this.postService.getAll({ userId: id }, pagination);
   }
 }

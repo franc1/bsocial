@@ -96,8 +96,8 @@ export class User {
       referencedColumnName: 'id',
     },
   })
-  followUsers: User[];
+  followUsers: User[] | number[];
 
   @ManyToMany(() => User, (user) => user.followUsers)
-  followedByUsers: User[];
+  followedByUsers: User[] | number[];
 }

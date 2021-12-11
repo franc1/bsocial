@@ -16,4 +16,14 @@ export class PostService {
 
     return await this.postRepository.save(post);
   }
+
+  async getAll(filters: { userId: number }): Promise<Post[]> {
+    const { userId } = filters;
+
+    const posts = await this.postRepository.find({
+      where: { createdBy: userId },
+    });
+
+    return posts;
+  }
 }

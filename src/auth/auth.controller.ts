@@ -1,7 +1,8 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/decorators/public-route.decorator';
 import { TokenParam } from 'src/decorators/token.decorator';
+import { ErrorResponse } from 'src/shared/error.response';
 
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login.dto';
@@ -11,6 +12,9 @@ import { Token } from './passport-strategies/token.request';
 
 @Controller('auth')
 @ApiTags('auth')
+@ApiBadRequestResponse({
+  type: ErrorResponse,
+})
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { ApiError } from 'src/shared/api-error';
+import { ErrorCodes } from 'src/shared/error-codes';
+import { hashPassword } from 'src/shared/hash-password';
 
+import { UserRegisterDTO } from './models/dto/user-register.dto';
 import { User } from './models/user.model';
 import { UserRepository } from './user.repository';
 
@@ -37,5 +41,31 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async register(userDTO: UserRegisterDTO): Promise<User> {
+    if (userDTO.password !== userDTO.confirmPassword) {
+      throw new ApiError(
+        400,
+        ErrorCodes.PASSWORD_AND_PASSWORD_CONFIRMATION_DO_NOT_MATCH,
+      );
+    }
+
+    // Check email/username existence
+    const countEmailsAndUsernames = await this.userRepository.count({
+      where: [{ email: userDTO.email }, { username: userDTO.username }],
+    });
+    if (countEmailsAndUsernames) {
+      throw new ApiError(400, ErrorCodes.EMAIL_OR_USERNAME_ALREADY_EXISTS);
+    }
+
+    const user = new User();
+    user.firstName = userDTO.firstName;
+    user.lastName = userDTO.lastName;
+    user.email = userDTO.email;
+    user.username = userDTO.username;
+    user.password = await hashPassword(userDTO.password);
+
+    return await this.userRepository.save(user);
   }
 }

@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -13,6 +15,7 @@ import { Post } from '../../post/models/post.model';
 
 @Entity('user')
 export class User {
+  @ApiProperty()
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp',
@@ -20,12 +23,14 @@ export class User {
   })
   createdDate: Date;
 
+  @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'int',
     name: 'id',
   })
   id: number;
 
+  @ApiProperty()
   @Column('varchar', {
     nullable: false,
     length: 100,
@@ -33,6 +38,7 @@ export class User {
   })
   firstName: string;
 
+  @ApiProperty()
   @Column('varchar', {
     nullable: false,
     length: 100,
@@ -40,6 +46,7 @@ export class User {
   })
   lastName: string;
 
+  @ApiProperty()
   @Column('varchar', {
     nullable: false,
     length: 100,
@@ -48,6 +55,7 @@ export class User {
   })
   username: string;
 
+  @ApiProperty()
   @Column('varchar', {
     nullable: false,
     length: 150,
@@ -56,6 +64,7 @@ export class User {
   })
   email: string;
 
+  @Exclude()
   @Column('varchar', {
     nullable: false,
     length: 150,

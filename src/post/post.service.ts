@@ -35,6 +35,41 @@ export class PostService {
     commentDTO: CommentCreateDTO,
     token: Token,
   ): Promise<Comment> {
+    await this.checkIfPostIsAccessibleForThisUser(postId, token);
+
+    return await this.commentService.create(postId, commentDTO, token);
+  }
+
+  async getAll(
+    filters: { userId: number },
+    pagination: PaginationParams,
+  ): Promise<{ posts: Post[]; postCount: number }> {
+    const { userId } = filters;
+    const { size, page } = pagination;
+
+    const [posts, postCount] = await this.postRepository.findAndCount({
+      where: { createdBy: userId },
+      skip: page > 0 ? (page - 1) * size : 0,
+      take: size,
+    });
+
+    return { posts, postCount };
+  }
+
+  async getAllPostComments(
+    postId: number,
+    pagination: PaginationParams,
+    token: Token,
+  ): Promise<{ comments: Comment[]; commentCount: number }> {
+    await this.checkIfPostIsAccessibleForThisUser(postId, token);
+
+    return await this.commentService.getAll({ postId }, pagination);
+  }
+
+  async checkIfPostIsAccessibleForThisUser(
+    postId: number,
+    token: Token,
+  ): Promise<void> {
     const post = await this.postRepository.findOne(postId, {
       relations: ['createdBy', 'createdBy.followedByUsers'],
     });
@@ -54,23 +89,5 @@ export class PostService {
         );
       }
     }
-
-    return await this.commentService.create(postId, commentDTO, token);
-  }
-
-  async getAll(
-    filters: { userId: number },
-    pagination: PaginationParams,
-  ): Promise<{ posts: Post[]; postCount: number }> {
-    const { userId } = filters;
-    const { size, page } = pagination;
-
-    const [posts, postCount] = await this.postRepository.findAndCount({
-      where: { createdBy: userId },
-      skip: page > 0 ? (page - 1) * size : 0,
-      take: size,
-    });
-
-    return { posts, postCount };
   }
 }

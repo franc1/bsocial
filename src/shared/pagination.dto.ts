@@ -5,7 +5,7 @@ export class PaginationParams {
   @IsOptional()
   @Type(() => Number)
   @IsPositive()
-  size?: number = 10;
+  size?: number = 20;
 
   @IsOptional()
   @Type(() => Number)

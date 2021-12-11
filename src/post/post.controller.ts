@@ -1,4 +1,12 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiForbiddenResponse,
@@ -9,8 +17,10 @@ import {
 import { plainToClass } from 'class-transformer';
 import { Token } from 'src/auth/passport-strategies/token.request';
 import { Comment } from 'src/comment/models/comment.model';
+import { CommentResponsePagination } from 'src/comment/models/dto/comment-page.response';
 import { TokenParam } from 'src/decorators/token.decorator';
 import { ErrorResponse } from 'src/shared/error.response';
+import { PaginationParams } from 'src/shared/pagination.dto';
 
 import { CommentCreateDTO } from './models/dto/comment-create.dto';
 import { PostCreateDTO } from './models/dto/post-create.dto';
@@ -30,6 +40,27 @@ import { PostService } from './post.service';
 })
 export class PostController {
   constructor(private readonly postService: PostService) {}
+
+  @Get(':id/comment')
+  @ApiNotFoundResponse({
+    type: ErrorResponse,
+  })
+  async getAllPostComments(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() pagination: PaginationParams,
+    @TokenParam() token: Token,
+  ): Promise<CommentResponsePagination> {
+    const { comments, commentCount } =
+      await this.postService.getAllPostComments(id, pagination, token);
+
+    const commentsResponse = plainToClass(Comment, comments);
+
+    return {
+      comments: commentsResponse,
+      itemsTotal: commentCount,
+      pagesTotal: Math.ceil(commentCount / pagination.size),
+    };
+  }
 
   @Post(':id/comment')
   @ApiNotFoundResponse({

@@ -1,4 +1,6 @@
-# bSocial
+# bsocial-api
+
+Main bSocial application for managing users/posts/comments and sending Kafka messages to other microservices.
 
 ## Installation
 

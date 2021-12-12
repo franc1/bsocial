@@ -1,8 +1,10 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Token } from 'src/auth/passport-strategies/token.request';
 import { CommentService } from 'src/comment/comment.service';
 import { Comment } from 'src/comment/models/comment.model';
@@ -20,14 +22,28 @@ export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly commentService: CommentService,
+    @Inject('KAFKA')
+    private readonly kafka: ClientProxy,
   ) {}
 
   async create(postDTO: PostCreateDTO, token: Token): Promise<Post> {
-    const post = new Post();
+    let post = new Post();
     post.content = postDTO.content;
     post.createdBy = token.id;
 
-    return await this.postRepository.save(post);
+    post = await this.postRepository.save(post);
+
+    // Send Kafka message
+    this.kafka.emit('create-post', {
+      username: token.username,
+      email: token.email,
+      userId: token.id,
+      timestamp: +post.createdDate,
+      postId: post.id,
+      messageContent: post.content,
+    });
+
+    return post;
   }
 
   async createComment(
@@ -35,9 +51,26 @@ export class PostService {
     commentDTO: CommentCreateDTO,
     token: Token,
   ): Promise<Comment> {
-    await this.checkIfPostIsAccessibleForThisUser(postId, token);
+    const postCreatedById = await this.checkIfPostIsAccessibleForThisUser(
+      postId,
+      token,
+    );
 
-    return await this.commentService.create(postId, commentDTO, token);
+    const comment = await this.commentService.create(postId, commentDTO, token);
+
+    // Send Kafka message
+    this.kafka.emit('create-comment', {
+      senderUsername: token.username,
+      senderEmail: token.email,
+      senderId: token.id,
+      timestamp: +comment.createdDate,
+      postId: postId,
+      commentId: comment.id,
+      commentContent: comment.content,
+      postOwnerId: postCreatedById,
+    });
+
+    return comment;
   }
 
   async getAll(
@@ -69,7 +102,7 @@ export class PostService {
   async checkIfPostIsAccessibleForThisUser(
     postId: number,
     token: Token,
-  ): Promise<void> {
+  ): Promise<number> {
     const post = await this.postRepository.findOne(postId, {
       relations: ['createdBy', 'createdBy.followedByUsers'],
     });
@@ -89,5 +122,7 @@ export class PostService {
         );
       }
     }
+
+    return (post.createdBy as User).id;
   }
 }

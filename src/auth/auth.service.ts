@@ -41,6 +41,7 @@ export class AuthService {
   }
 
   async login(token: Token): Promise<LoginResponseDTO> {
+    // Send Kafka message
     this.kafka.emit('login', { ...token });
 
     const payload = {

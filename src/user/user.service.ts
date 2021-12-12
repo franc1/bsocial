@@ -1,8 +1,10 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Token } from 'src/auth/passport-strategies/token.request';
 import { Post } from 'src/post/models/post.model';
 import { PostService } from 'src/post/post.service';
@@ -20,6 +22,8 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly postService: PostService,
+    @Inject('KAFKA')
+    private readonly kafka: ClientProxy,
   ) {}
 
   async findOne(
@@ -70,14 +74,20 @@ export class UserService {
       throw new ApiError(400, ErrorCodes.EMAIL_OR_USERNAME_ALREADY_EXISTS);
     }
 
-    const user = new User();
+    let user = new User();
     user.firstName = userDTO.firstName;
     user.lastName = userDTO.lastName;
     user.email = userDTO.email;
     user.username = userDTO.username;
     user.password = await hashPassword(userDTO.password);
 
-    return await this.userRepository.save(user);
+    user = await this.userRepository.save(user);
+
+    // Send Kafka message
+    delete user.password;
+    this.kafka.emit('register', { ...user });
+
+    return user;
   }
 
   async getAllUserPosts(

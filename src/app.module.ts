@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionOptions } from 'typeorm';
 
@@ -40,20 +39,6 @@ const getOrmConfig = (configService: ConfigService) =>
         autoLoadEntities: true,
       }),
     }),
-    ClientsModule.register([
-      {
-        name: 'KAFKA',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: ['localhost:9092'],
-          },
-          consumer: {
-            groupId: 'client',
-          },
-        },
-      },
-    ]),
     PostModule,
     CommentModule,
     UserModule,

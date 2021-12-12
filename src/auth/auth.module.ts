@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { clientProxyFactory } from 'src/shared/client-proxy-factory';
 import { UserModule } from 'src/user/user.module';
 
 import { AuthController } from './auth.controller';
@@ -22,7 +23,15 @@ import { LocalStrategy } from './passport-strategies/local/local.strategy';
       }),
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    {
+      provide: 'KAFKA',
+      useValue: clientProxyFactory,
+    },
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })

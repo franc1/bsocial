@@ -1,4 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { BsocialNotificationsMicroserviceService } from './bsocial-notifications-microservice.service';
 
@@ -8,8 +9,8 @@ export class BsocialNotificationsMicroserviceController {
     private readonly bsocialNotificationsMicroserviceService: BsocialNotificationsMicroserviceService,
   ) {}
 
-  @Get()
-  getHello(): string {
-    return this.bsocialNotificationsMicroserviceService.getHello();
+  @MessagePattern('create-comment')
+  public createComment(@Payload() payload: any) {
+    console.log('----------', payload.value);
   }
 }

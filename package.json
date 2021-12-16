@@ -22,9 +22,11 @@
     "typeorm": "ts-node --transpile-only ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^7.16.0",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.5",
     "@nestjs/core": "^8.0.0",
+    "@nestjs/elasticsearch": "^8.0.0",
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/microservices": "^8.2.3",
     "@nestjs/passport": "^8.0.1",

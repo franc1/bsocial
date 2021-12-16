@@ -11,11 +11,11 @@ export = {
   logger: 'advanced-console',
   logging: process.env.NODE_ENV !== 'production',
   migrationsRun: true,
-  entities: [__dirname + '/src/**/*.model.{js,ts}'],
-  migrations: [__dirname + '/src/migrations/*.{js,ts}'],
-  subscribers: [__dirname + '/src/subscribers/**/*.{js,ts}'],
+  entities: [__dirname + '/apps/bsocial-api/src/**/*.model.{js,ts}'],
+  migrations: [__dirname + '/apps/bsocial-api/src/migrations/*.{js,ts}'],
+  subscribers: [__dirname + '/apps/bsocial-api/src/subscribers/**/*.{js,ts}'],
   cli: {
-    migrationsDir: __dirname + '/src/migrations',
-    subscribersDir: __dirname + '/src/subscribers',
+    migrationsDir: __dirname + '/apps/bsocial-api/src/migrations',
+    subscribersDir: __dirname + '/apps/bsocial-api/src/subscribers',
   },
 } as ConnectionOptions;

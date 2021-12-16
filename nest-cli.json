@@ -1,7 +1,33 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/bsocial-api/src",
   "compilerOptions": {
-    "plugins": ["@nestjs/swagger/plugin"]
+    "plugins": [
+      "@nestjs/swagger/plugin"
+    ],
+    "webpack": true,
+    "tsConfigPath": "apps/bsocial-api/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/bsocial-api",
+  "projects": {
+    "bsocial-api": {
+      "type": "application",
+      "root": "apps/bsocial-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/bsocial-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/bsocial-api/tsconfig.app.json"
+      }
+    },
+    "bsocial-notifications-microservice": {
+      "type": "application",
+      "root": "apps/bsocial-notifications-microservice",
+      "entryFile": "main",
+      "sourceRoot": "apps/bsocial-notifications-microservice/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/bsocial-notifications-microservice/tsconfig.app.json"
+      }
+    }
   }
 }

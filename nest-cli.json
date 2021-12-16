@@ -28,6 +28,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/bsocial-notifications-microservice/tsconfig.app.json"
       }
+    },
+    "bsocial-elasticsearch-microservice": {
+      "type": "application",
+      "root": "apps/bsocial-elasticsearch-microservice",
+      "entryFile": "main",
+      "sourceRoot": "apps/bsocial-elasticsearch-microservice/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/bsocial-elasticsearch-microservice/tsconfig.app.json"
+      }
     }
   }
 }

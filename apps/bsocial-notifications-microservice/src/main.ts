@@ -4,6 +4,8 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { BsocialNotificationsMicroserviceModule } from './bsocial-notifications-microservice.module';
 
 const port = process.env.notificationsMicroservicePort;
+const kafkaHost = process.env.kafkaHost;
+const kafkaPort = process.env.kafkaPort;
 
 async function bootstrap() {
   const app = await NestFactory.create(BsocialNotificationsMicroserviceModule);
@@ -15,7 +17,7 @@ async function bootstrap() {
         groupId: 'notifications',
       },
       client: {
-        brokers: ['localhost:9092'],
+        brokers: [`${kafkaHost}:${kafkaPort}`],
       },
     },
   } as MicroserviceOptions);

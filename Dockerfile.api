@@ -1,0 +1,20 @@
+FROM node:12
+
+# Create app directory, this is in our container/in our image
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+
+RUN npm install
+
+# Bundle app source
+COPY . .
+
+RUN npm run build bsocial-api
+
+ADD run-migrations-and-start.sh /
+RUN chmod +x /run-migrations-and-start.sh
+
+CMD ["/run-migrations-and-start.sh"]

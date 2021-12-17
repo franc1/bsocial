@@ -1,0 +1,126 @@
+version: '3'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - '2181:2181'
+    networks:
+      - app-net
+  kafka:
+    image: wurstmeister/kafka:2.11-1.1.0
+    ports:
+      - '9092:9092'
+      - '9093:9093'
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
+    networks:
+      - app-net
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - app-net
+
+  bsocial-db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'bsocial'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+    volumes:
+      - bsocial-db-data:/var/lib/mysql
+    networks:
+      - app-net
+
+  bsocial-api:
+    image: bsocial-api-image 
+    build:
+      dockerfile: Dockerfile.api
+      context: .
+    depends_on: 
+      - kafka
+      - elasticsearch
+      - bsocial-db
+    environment:
+      jwtPrivateKey: cNDPnpkSGnrnGbs2GSEN
+      dbName: bsocial
+      dbUser: user
+      dbPass: password
+      dbHost: bsocial-db
+      dbPort: 3306
+      port: 3000
+      kafkaHost: kafka
+      kafkaPort: 9093
+    ports:
+      - "8080:3000"
+    networks:
+      - app-net
+
+  notifications-microservice:
+    image: notifications-microservice-image 
+    build:
+      dockerfile: Dockerfile.notifications
+      context: .
+    depends_on: 
+      - bsocial-api
+    environment:
+      jwtPrivateKey: cNDPnpkSGnrnGbs2GSEN
+      kafkaHost: kafka
+      kafkaPort: 9093
+      port: 3001
+    ports:
+      - "3001:3001"
+    networks:
+      - app-net
+
+  elasticsearch-microservice:
+    image: elasticsearch-microservice-image 
+    build:
+      dockerfile: Dockerfile.elasticsearch
+      context: .
+    depends_on: 
+      - bsocial-api
+    environment:
+      ELASTICSEARCH_NODE: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: admin
+      kafkaHost: kafka
+      kafkaPort: 9093
+      port: 3002
+    networks:
+      - app-net
+  
+volumes:
+  elasticsearch-data:
+  bsocial-db-data:
+networks:
+  app-net:
+    driver: bridge

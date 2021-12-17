@@ -20,3 +20,8 @@
 1. Clone project repository
 2. Change directory to project directory
 3. Run command: `docker-compose up`
+
+### For testing notifications
+
+1. Go to: **http://localhost:3001**
+2. On dialog box put **JWT token** of logged user, which notifications want to receive

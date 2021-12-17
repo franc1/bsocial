@@ -1,0 +1,48 @@
+1 answer:
+GET: http://localhost:9200/login/_search
+body: {
+    "aggs":
+    {
+        "byDay":
+        {
+            "date_histogram":
+            {
+                "field": "timestamp",
+                "interval": "day"
+            }
+        }
+        
+    }
+}
+
+2 answer:
+GET: http://localhost:9200/comments/_search
+body: {
+    "size": 0,
+    "aggs":
+    {
+        "byDay": 
+        {
+            "date_histogram":
+            {
+                "field": "timestamp",
+                "interval": "day",
+                "order": {
+                    "_count": "desc"
+                }
+            },
+            "aggs":
+            {
+                 "byPost":
+                {
+                    "terms":
+                    {
+                        "field": "postId",
+                        "size": 10
+                    }
+                }
+            }
+        }       
+    }
+}
+

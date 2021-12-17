@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>New Comments</title>
+    <link href="https://unpkg.com/vue-simple-notify/dist/vue-simple-notify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-simple-notify/dist/vue-simple-notify.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <main id="v-app">
+        <section>
+            <h1>List of comments added on your posts:</h1>
+            <p>
+                <ul>
+                    <li v-for="comment of comments">
+                        <strong>{{ comment }}</strong>
+                    </li>
+                </ul>
+            </p>
+        </section>
+    </main>
+    <script>
+        Vue.component('alerts-component', VueSimpleNotify.VueSimpleNotify);
+        var app = new Vue({
+            el: '#v-app',
+            data: {
+                token: '',
+                comments: [],
+                socket: null,
+            },
+            methods: {
+                receiveNewComment(comment) {
+                    this.comments.push(comment);
+                },
+            },
+            created() {
+                this.token = prompt('Enter your TOKEN:');
+
+                const socketOptions = {
+                    transportOptions: {
+                        polling: {
+                        extraHeaders: {
+                            Authorization: `Bearer ${this.token}`,
+                        }
+                        }
+                    }
+                };
+                this.socket = io('http://localhost:3001/comment', socketOptions);
+                this.socket.on('new-comment', (comment) => {
+                    this.receiveNewComment(comment);
+                });
+            }
+        });
+    
+    </script>
+</body>
+</html>
